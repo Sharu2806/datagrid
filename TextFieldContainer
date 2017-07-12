@@ -1,0 +1,179 @@
+import React, { Component } from 'react';
+import TopNavigation from './SideNavigation';
+import SerialNoTextFields from './SerialNumberTextfields/serialnotextfields.js';
+
+export default class App extends Component {
+
+  constructor(props){
+      super(props);
+      this.state ={
+        minval : {},
+        maxval : {},
+        allocno : {},
+        isValidMinVal : false,
+        isValidMaxVal : false,
+        isValidAllocNo : false,
+        minIsGreater : false
+
+      }
+      this.handleChangeOnVal = this.handleChangeOnVal.bind(this);
+      this.dataValidation = this.dataValidation.bind(this);
+  }
+
+  handleChangeOnVal(event){
+
+      let value = event.target.value;
+      let name = event.target.name;
+      let isValid = false;
+      if(value === '' | value === undefined || value === 'undefined'){
+        isValid = false;
+      }else if(value.length < 6){
+        isValid = false;
+      }else if (!value.match("^[0-9]*$")) {
+          isValid = false;
+      }else if(name == "max_val"){
+          if(this.state.minval > value){
+            isValid = false;
+          }else{
+            isValid = true;
+          }
+      }else if(name == "alloc_no"){
+        if(value > this.state.minval && value < this.state.maxval){
+          isValid = true;
+        }else{
+          isValid = false;
+        }
+      }
+      else{
+          isValid = true;
+      }
+      this.checkFieldForValidation(isValid,name,value);
+
+  }
+
+
+  //check whether minvalue /max value is wrong
+  checkFieldForValidation(isValid,name,value){
+    let setStateForMinVal = false;
+    let setStateForMaxVal = false;
+    let setStateForAllocNo = false;
+    let minval_current = this.state.minval;
+    let maxval_current = this.state.maxval;
+    let allocno_current = this.state.allocno;
+
+
+    if(isValid && name=="min_val"){
+      setStateForMinVal = true;
+    }else if(isValid && name=="max_val"){
+      setStateForMaxVal = true;
+    }else if(isValid && name=="alloc_no"){
+      setStateForAllocNo = true;
+    }else if(!isValid){
+      if(name=="min_val"){
+        setStateForMinVal = true;
+        console.log("invalid min");
+      }else if(name=="max_val"){
+        setStateForMaxVal = true;
+        console.log("invalid max");
+      }else if(name=="alloc_no"){
+        setStateForAllocNo = true;
+      }
+    }
+    debugger;
+    if(setStateForMinVal){
+      minval_current.push(value);
+      this.setState({minval : minval_current});
+      this.setState({isValidMinVal : isValid});
+      console.log("valid min");
+    }else if(setStateForMaxVal){
+      maxval_current.push(value);
+      this.setState({maxval : maxval_current});
+      this.setState({isValidMaxVal : isValid});
+      console.log("valid max");
+    }else if(setStateForAllocNo){
+      allocno_current.push(value);
+      this.setState({allocno : allocno_current});
+      this.setState({isValidAllocNo : isValid});
+    }
+  }
+
+
+  dataValidation(){
+
+
+  }
+  render() {
+    return (
+<div>
+  <table className="table">
+  <thead>
+    <tr>
+      <th>Product Type</th>
+      <th>Min Value</th>
+      <th>Max Value</th>
+      <th>Last No. Alloc</th>
+    </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Import Documentary Credits</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+        </tr>
+
+        <tr>
+          <th scope="row">Import Bill</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+        </tr>
+        <tr>
+          <th scope="row">Import Shipping Guarantee</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+
+        </tr>
+        <tr>
+          <th scope="row">Import Loan</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+
+        </tr>
+        <tr>
+          <th scope="row">Import Marginal Deposit</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+
+        </tr>
+        <tr>
+          <th scope="row">Export Bill</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+
+        </tr>
+        <tr>
+          <th scope="row">Export Loan</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+
+        </tr>
+        <tr>
+          <th scope="row">Export Marginal Deposit</th>
+          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
+          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
+          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
+
+        </tr>
+      </tbody>
+    </table>
+    <div><button className="btn btn-primary" onClick={this.dataValidation}>Submit</button></div>
+</div>
+    );
+  }
+}
