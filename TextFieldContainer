@@ -2,177 +2,218 @@ import React, { Component } from 'react';
 import TopNavigation from './SideNavigation';
 import SerialNoTextFields from './SerialNumberTextfields/serialnotextfields.js';
 
+
 export default class App extends Component {
 
   constructor(props){
       super(props);
       this.state ={
-        minval : {},
+        minval :{},
         maxval : {},
         allocno : {},
         isValidMinVal : false,
         isValidMaxVal : false,
-        isValidAllocNo : false,
-        minIsGreater : false
+        isValidAllocNo : {},
+        maxIsGreater : {},
+        tableData : [
+          {rowTitle: 'Import Documentary Credits' , minID:'min_1', maxID:'max_1', allocID:'alloc_1',rowID:'row_1'},
+          {rowTitle: 'Import Bill', minID:'min_2', maxID:'max_2', allocID:'alloc_2', rowID:'row_2'},
+          {rowTitle: 'Import Shipping Guarantee', minID:'min_3', maxID:'max_3', allocID:'alloc_3',rowID:'row_3'},
+          {rowTitle: 'Import Loan', minID:'min_4', maxID:'max_4', allocID:'alloc_4',rowID:'row_4'},
+          {rowTitle: 'Import Marginal Deposit', minID:'min_5', maxID:'max_5', allocID:'alloc_5',rowID:'row_5'},
+          {rowTitle: 'Export Bill', minID:'min_6', maxID:'max_6', allocID:'alloc_6',rowID:'row_6'},
+          {rowTitle: 'Export Loan', minID:'min_7', maxID:'max_7', allocID:'alloc_7',rowID:'row_7'},
+          {rowTitle: 'Export Marginal Deposit', minID:'min_8', maxID:'max_8', allocID:'alloc_8',rowID:'row_8'}
+        ]
 
       }
       this.handleChangeOnVal = this.handleChangeOnVal.bind(this);
-      this.dataValidation = this.dataValidation.bind(this);
+      this.onSubmitCreateSerialNo = this.onSubmitCreateSerialNo.bind(this);
+
   }
 
+/* validation of all fields general */
+  validateData(value){
+    let isValid = false;
+    if(value === '' || value === undefined || value === 'undefined'){
+      isValid = false;
+    }else if (value.length < 6 || value.length > 6) {
+        isValid = false;
+    }else{
+      isValid = true;
+    }
+    return isValid;
+  }
+ /* validation of max val in splc case */
+  validateMaxVal(id){
+    if(this.state.maxIsGreater[id]){
+      return true;
+    }else{
+      return false;
+    }
+  }
+  /* validation of alloc in splc case */
+  validateAllocNo(id){
+    if(this.state.isValidAllocNo[id]){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+ /* On Change setting State */
   handleChangeOnVal(event){
+    let value = event.target.value;
+    let name = event.target.name;
+    let id = event.target.id.slice(-1);
 
-      let value = event.target.value;
-      let name = event.target.name;
-      let isValid = false;
-      if(value === '' | value === undefined || value === 'undefined'){
-        isValid = false;
-      }else if(value.length < 6){
-        isValid = false;
-      }else if (!value.match("^[0-9]*$")) {
-          isValid = false;
-      }else if(name == "max_val"){
-          if(this.state.minval > value){
-            isValid = false;
-          }else{
-            isValid = true;
-          }
-      }else if(name == "alloc_no"){
-        if(value > this.state.minval && value < this.state.maxval){
-          isValid = true;
+    if(name == "min_val"){
+      let obj  = this.state.minval;
+      obj[id] = value;
+      this.setState({minval : obj});
+
+    }else if(name == "max_val"){
+        let obj  = this.state.maxval;
+        let temp = this.state.maxIsGreater;
+        if(value > this.state.minval[id]  && this.state.minval[id] != value){
+          temp[id] = true;
         }else{
-          isValid = false;
+          temp[id] = false;
         }
-      }
-      else{
-          isValid = true;
-      }
-      this.checkFieldForValidation(isValid,name,value);
-
-  }
-
-
-  //check whether minvalue /max value is wrong
-  checkFieldForValidation(isValid,name,value){
-    let setStateForMinVal = false;
-    let setStateForMaxVal = false;
-    let setStateForAllocNo = false;
-    let minval_current = this.state.minval;
-    let maxval_current = this.state.maxval;
-    let allocno_current = this.state.allocno;
-
-
-    if(isValid && name=="min_val"){
-      setStateForMinVal = true;
-    }else if(isValid && name=="max_val"){
-      setStateForMaxVal = true;
-    }else if(isValid && name=="alloc_no"){
-      setStateForAllocNo = true;
-    }else if(!isValid){
-      if(name=="min_val"){
-        setStateForMinVal = true;
-        console.log("invalid min");
-      }else if(name=="max_val"){
-        setStateForMaxVal = true;
-        console.log("invalid max");
-      }else if(name=="alloc_no"){
-        setStateForAllocNo = true;
-      }
-    }
-    debugger;
-    if(setStateForMinVal){
-      minval_current.push(value);
-      this.setState({minval : minval_current});
-      this.setState({isValidMinVal : isValid});
-      console.log("valid min");
-    }else if(setStateForMaxVal){
-      maxval_current.push(value);
-      this.setState({maxval : maxval_current});
-      this.setState({isValidMaxVal : isValid});
-      console.log("valid max");
-    }else if(setStateForAllocNo){
-      allocno_current.push(value);
-      this.setState({allocno : allocno_current});
-      this.setState({isValidAllocNo : isValid});
+        obj[id] = value;
+        this.setState({maxval : obj});
+        this.setState({maxIsGreater:temp});
+    }else if(name == "alloc_no"){
+        let obj  = this.state.allocno;
+        let temp = this.state.isValidAllocNo;
+        if(value >= this.state.minval[id] && value <= this.state.maxval[id]){
+          temp[id] = true;
+        }else{
+          temp[id] = false;
+        }
+        obj[id] = value;
+        this.setState({allocno : obj});
+        this.setState({isValidAllocNo:temp});
     }
   }
 
 
-  dataValidation(){
 
+
+
+ /* On submit Validation */
+  onSubmitCreateSerialNo(){
+    let data = [1,2,3,4,5,6,7,8];
+    data.map((data)=>{
+
+
+          let flag = false;
+          if(this.state.minval.hasOwnProperty(data)){
+              flag = this.validateData(this.state.minval[data]);
+              document.getElementsByName('min_'+data)[0].innerText = flag ? '' : 'Missing Min Value.';
+              document.getElementsByName('min_'+data)[0].className = flag ? 'hideError' : 'showError';
+          }else{
+              document.getElementsByName('min_'+data)[0].innerText ='Missing Min Value.';
+              document.getElementsByName('min_'+data)[0].className = 'showError';
+          }
+
+          if(this.state.maxval.hasOwnProperty(data)){
+              if(this.validateData(this.state.maxval[data])){
+                flag = this.validateMaxVal([data]);
+              }else{
+                flag = false;
+              }
+              document.getElementsByName('max_'+data)[0].innerText = flag ? '' : 'The Max value must be greater than the Min value.';
+              document.getElementsByName('max_'+data)[0].className = flag ? 'hideError' : 'showError';
+          }else{
+              document.getElementsByName('max_'+data)[0].innerText ='The Max value must be greater than the Min value.';
+              document.getElementsByName('max_'+data)[0].className = 'showError';
+          }
+
+          if(this.state.allocno.hasOwnProperty(data)){
+              if(this.validateData(this.state.allocno[data])){
+                flag = this.validateAllocNo(data);
+                document.getElementsByName('alloc_'+data)[0].innerText = flag ? '' : 'The last No alloc must be between min value and max value.';
+              }else{
+                flag = false;
+                document.getElementsByName('alloc_'+data)[0].innerText = 'Missing Last No. Alloc.';
+              }
+              document.getElementsByName('alloc_'+data)[0].className = flag ? 'hideError' : 'showError';
+          }else{
+              document.getElementsByName('alloc_'+data)[0].innerText ='Missing Last No. Alloc.';
+              document.getElementsByName('alloc_'+data)[0].className = 'showError';
+          }
+
+
+    });
+
+
+  // isNumeric(evt){
+  //     var theEvent = evt || window.event;
+  //     var key = theEvent.keyCode || theEvent.which;
+  //     key = String.fromCharCode (key);
+  //     var regex = /[0-9]|\./;
+  //     if ( !regex.test(key) ) {
+  //       theEvent.returnValue = false;
+  //       if(theEvent.preventDefault) theEvent.preventDefault();
+  //     }
+  //   }
+  //
+  // maxLengthCheck(object) {
+  //   if (object.value.length > object.maxLength)
+  //     object.value = object.value.slice(0, object.maxLength)
+  //  }
 
   }
   render() {
+
+
+ // const tableData = [
+ //   {rowTitle: 'Import Documentary Credits' , minID:'min_1', maxID:'max_1', allocID:'alloc_1',rowID:'row_1'},
+ //   {rowTitle: 'Import Bill', minID:'min_2', maxID:'max_2', allocID:'alloc_2', rowID:'row_2'},
+ //   {rowTitle: 'Import Shipping Guarantee', minID:'min_3', maxID:'max_3', allocID:'alloc_3',rowID:'row_3'},
+ //   {rowTitle: 'Import Loan', minID:'min_4', maxID:'max_4', allocID:'alloc_4',rowID:'row_4'},
+ //   {rowTitle: 'Import Marginal Deposit', minID:'min_5', maxID:'max_5', allocID:'alloc_5',rowID:'row_5'},
+ //   {rowTitle: 'Export Bill', minID:'min_6', maxID:'max_6', allocID:'alloc_6',rowID:'row_6'},
+ //   {rowTitle: 'Export Loan', minID:'min_7', maxID:'max_7', allocID:'alloc_7',rowID:'row_7'},
+ //   {rowTitle: 'Export Marginal Deposit', minID:'min_8', maxID:'max_8', allocID:'alloc_8',rowID:'row_8'}
+ // ];
+ const myData = this.state.tableData.map((data, i) => {
+     return (
+       <SerialNoTextFields
+         key={i}
+         rowTitle={data.rowTitle}
+         minID ={data.minID}
+         maxID ={data.maxID}
+         allocID ={data.allocID}
+         rowID = {data.rowID}
+         nameForMinval="min_val"
+         nameForMaxval ="max_val"
+         nameForAllocNo ="alloc_no"
+         minValue ={this.state.minValue}
+         maxval ={this.state.maxValue}
+         allocNo = {this.state.allocNo}
+         handleChange ={this.handleChangeOnVal}
+       />
+     );
+   });
     return (
 <div>
   <table className="table">
-  <thead>
-    <tr>
-      <th>Product Type</th>
-      <th>Min Value</th>
-      <th>Max Value</th>
-      <th>Last No. Alloc</th>
-    </tr>
+      <thead>
+          <tr>
+            <th>Product Type</th>
+            <th>Min Value</th>
+            <th>Max Value</th>
+            <th>Last No. Alloc</th>
+          </tr>
       </thead>
       <tbody>
-        <tr>
-          <th scope="row">Import Documentary Credits</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-        </tr>
-
-        <tr>
-          <th scope="row">Import Bill</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-        </tr>
-        <tr>
-          <th scope="row">Import Shipping Guarantee</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-
-        </tr>
-        <tr>
-          <th scope="row">Import Loan</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-
-        </tr>
-        <tr>
-          <th scope="row">Import Marginal Deposit</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-
-        </tr>
-        <tr>
-          <th scope="row">Export Bill</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-
-        </tr>
-        <tr>
-          <th scope="row">Export Loan</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-
-        </tr>
-        <tr>
-          <th scope="row">Export Marginal Deposit</th>
-          <SerialNoTextFields nameForMinval="min_val"  handleChangeMin={this.handleChangeOnVal} minValue={this.state.minval}/>
-          <SerialNoTextFields nameForMaxval="max_val" handleChangeMax={this.handleChangeOnVal} maxValue={this.state.maxval}/>
-          <SerialNoTextFields nameForAllocNo="alloc_no" handleChangeOnAlloc={this.handleChangeOnVal} allocNo={this.state.allocno}/>
-
-        </tr>
+        {myData}
       </tbody>
-    </table>
-    <div><button className="btn btn-primary" onClick={this.dataValidation}>Submit</button></div>
+  </table>
+
+    <div><button className="btn btn-primary" onClick={this.onSubmitCreateSerialNo}>Submit</button></div>
 </div>
     );
   }
